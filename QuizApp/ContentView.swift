@@ -13,7 +13,17 @@ struct ContentView: View {
     @State private var questionIndex = 0
 
     var body: some View {
-        VStack {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.91, green: 0.85, blue: 0.96),
+                    Color(red: 0.82, green: 0.74, blue: 0.92)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
             switch screen {
             case .start:
                 StartView(screen: $screen)
@@ -29,7 +39,6 @@ struct ContentView: View {
                 ResultView(score: score, total: sampleQuestions.count, screen: $screen)
             }
         }
-        .padding()
     }
 }
 
