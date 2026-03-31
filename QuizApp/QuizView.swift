@@ -24,7 +24,7 @@ struct QuizView: View {
         VStack(spacing: 24) {
             // Question card
             VStack(spacing: 12) {
-                Text(String(format: "%02d", questionIndex + 1))
+                Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
                     .font(.subheadline.bold())
                     .foregroundStyle(.white.opacity(0.8))
 
