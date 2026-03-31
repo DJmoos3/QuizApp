@@ -13,6 +13,7 @@ struct StartView: View {
     var body: some View {
         VStack {
             Spacer()
+            NameFieldSnippet()
 
             VStack(spacing: 16) {
                 Image(systemName: "brain.head.profile")
