@@ -10,6 +10,8 @@ struct ResultView: View {
     let score: Int
     let total: Int
     @Binding var screen: Screen
+    
+    var onRestart: (() -> Void)? = nil
 
     private let cardColor = Color(red: 0.62, green: 0.49, blue: 0.70)
     private let darkPurple = Color(red: 0.45, green: 0.30, blue: 0.60)
@@ -39,6 +41,7 @@ struct ResultView: View {
             Spacer()
 
             Button {
+                onRestart?()
                 screen = .start
             } label: {
                 Text("PLAY AGAIN")
