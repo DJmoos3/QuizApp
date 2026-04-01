@@ -22,6 +22,16 @@ struct QuizView: View {
         let question = sampleQuestions[questionIndex]
 
         VStack(spacing: 24) {
+            
+            VStack(spacing: 8) {
+                 ProgressView(value: Double(questionIndex + 1), total: Double(sampleQuestions.count))
+                     .tint(darkPurple)
+
+                 Text("Score: \(score)")
+                     .font(.subheadline.bold())
+                     .foregroundStyle(darkPurple)
+             }
+             .padding(.horizontal, 40)
             // Question card
             VStack(spacing: 12) {
                 Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
