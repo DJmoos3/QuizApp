@@ -36,13 +36,10 @@ struct ContentView: View {
                 )
 
             case .result:
-                ResultView(score: score, total: sampleQuestions.count, screen: $screen)
-                    .onChange(of: screen) {
-                        if screen == .start {
-                            score = 0
-                            questionIndex = 0
-                        }
-                    }
+                ResultView(score: score, total: sampleQuestions.count, screen: $screen) {
+                    score = 0
+                    questionIndex = 0
+                }
             }
         }
     }
