@@ -12,6 +12,7 @@ struct QuizView: View {
     @Binding var questionIndex: Int
 
     @State private var selectedAnswer: String? = nil
+    @State private var answered = false
 
     private let letters = ["A", "B", "C", "D"]
     private let cardColor = Color(red: 0.62, green: 0.49, blue: 0.70)
@@ -74,7 +75,7 @@ struct QuizView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity)
-                        .background(selectedAnswer == option ? cardColor.opacity(0.7) : pillColor.opacity(0.5))
+                        .background(buttonColor(for: option, question: question))
                         .clipShape(Capsule())
                         .overlay(
                             Capsule()
@@ -107,17 +108,32 @@ struct QuizView: View {
     }
 
     func checkAnswer(question: Question) {
-        if selectedAnswer == question.correctAnswer {
-            score += 1
-        }
+        answered = true
 
-        selectedAnswer = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {  // creates a delay before changing screen so you can see the colour change
+            if selectedAnswer == question.correctAnswer {
+                score += 1
+            }
 
-        if questionIndex < sampleQuestions.count - 1 {
-            questionIndex += 1
-        } else {
-            screen = .result
+            selectedAnswer = nil
+            answered = false
+
+            if questionIndex < sampleQuestions.count - 1 {
+                questionIndex += 1
+            } else {
+                screen = .result
+            }
         }
+    }
+    
+    func buttonColor(for option: String, question: Question) -> Color {
+        guard selectedAnswer == option else {
+            return pillColor.opacity(0.5)  // Colour stays the same if not selected
+        }
+        if !answered {
+            return cardColor.opacity(0.7)  // Colour change after being selected
+        }
+        return option == question.correctAnswer ? Color.green.opacity(0.7) : Color.red.opacity(0.7) // This changes the colour into red or green depending on whether the answer is correct or not
     }
 }
 
