@@ -44,7 +44,7 @@ struct NameFieldSnippet: View {
                 .opacity(name.isEmpty ? 0.5 : 1.0)
 
             } else {
-                Text("Hello,\(confirmedName)! Good Luck 😄")
+                Text("Hello,\(confirmedName)! Good Luck!")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color(red: 0.45, green: 0.30, blue: 0.60))
             }

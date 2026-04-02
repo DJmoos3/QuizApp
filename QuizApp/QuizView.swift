@@ -27,64 +27,79 @@ struct QuizView: View {
             VStack(spacing: 8) {
                  ProgressView(value: Double(questionIndex + 1), total: Double(sampleQuestions.count))
                      .tint(darkPurple)
+                     .animation(.easeInOut(duration: 0.4), value: questionIndex)
 
                  Text("Score: \(score)")
                      .font(.subheadline.bold())
                      .foregroundStyle(darkPurple)
              }
              .padding(.horizontal, 40)
-            // Question card
-            VStack(spacing: 12) {
-                Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.white.opacity(0.8))
 
-                Text(question.text)
-                    .font(.title3.bold())
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
-            }
-            .padding(.vertical, 28)
-            .padding(.horizontal, 20)
-            .frame(maxWidth: .infinity)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 24))
-            .padding(.horizontal, 20)
+            // Question card + answers — animated on question change
+            VStack(spacing: 24) {
+                // Question card
+                VStack(spacing: 12) {
+                    Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.white.opacity(0.8))
 
-            // Answer options
-            VStack(spacing: 12) {
-                ForEach(Array(question.answers.enumerated()), id: \.offset) { index, option in
-                    Button {
-                        selectedAnswer = option
-                    } label: {
-                        HStack(spacing: 14) {
-                            Text(letters[index])
-                                .font(.callout.bold())
-                                .foregroundStyle(darkPurple)
-                                .frame(width: 32, height: 32)
-                                .background(Color.white)
-                                .clipShape(Circle())
+                    Text(question.text)
+                        .font(.title3.bold())
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+                .padding(.vertical, 28)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity)
+                .background(cardColor)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .padding(.horizontal, 20)
 
-                            Text(option)
-                                .font(.body)
-                                .foregroundStyle(darkPurple)
+                // Answer options
+                VStack(spacing: 12) {
+                    ForEach(Array(question.answers.enumerated()), id: \.offset) { index, option in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedAnswer = option
+                            }
+                        } label: {
+                            HStack(spacing: 14) {
+                                Text(letters[index])
+                                    .font(.callout.bold())
+                                    .foregroundStyle(darkPurple)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white)
+                                    .clipShape(Circle())
 
-                            Spacer()
+                                Text(option)
+                                    .font(.body)
+                                    .foregroundStyle(darkPurple)
+
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(buttonColor(for: option, question: question))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(selectedAnswer == option ? Color.white : Color.clear, lineWidth: 2)
+                            )
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(buttonColor(for: option, question: question))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(selectedAnswer == option ? Color.white : Color.clear, lineWidth: 2)
-                        )
+                        .scaleEffect(selectedAnswer == option ? 1.03 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedAnswer)
                     }
                 }
+                .padding(.horizontal, 30)
             }
-            .padding(.horizontal, 30)
+            .id(questionIndex)
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            ))
+            .animation(.easeInOut(duration: 0.35), value: questionIndex)
 
             Spacer()
 
@@ -118,10 +133,12 @@ struct QuizView: View {
             selectedAnswer = nil
             answered = false
 
-            if questionIndex < sampleQuestions.count - 1 {
-                questionIndex += 1
-            } else {
-                screen = .result
+            withAnimation(.easeInOut(duration: 0.35)) {
+                if questionIndex < sampleQuestions.count - 1 {
+                    questionIndex += 1
+                } else {
+                    screen = .result
+                }
             }
         }
     }

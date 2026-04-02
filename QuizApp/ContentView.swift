@@ -27,24 +27,30 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
-            switch screen {
-            case .start:
-                StartView(screen: $screen)
+            Group {
+                switch screen {
+                case .start:
+                    StartView(screen: $screen)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
 
-            case .quiz:
-                QuizView(
-                    screen: $screen,
-                    score: $score,
-                    questionIndex: $questionIndex
-                )
+                case .quiz:
+                    QuizView(
+                        screen: $screen,
+                        score: $score,
+                        questionIndex: $questionIndex
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
 
-            case .result:
-                ResultView(score: score, total: sampleQuestions.count, screen: $screen) {
-                    lastScore = score
-                    score = 0
-                    questionIndex = 0
+                case .result:
+                    ResultView(score: score, total: sampleQuestions.count, screen: $screen) {
+                        lastScore = score
+                        score = 0
+                        questionIndex = 0
+                    }
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
+            .animation(.easeInOut(duration: 0.4), value: screen)
         }
     }
 }
