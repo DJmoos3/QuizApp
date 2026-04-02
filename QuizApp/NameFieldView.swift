@@ -19,11 +19,13 @@ struct NameFieldSnippet: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(Color(red: 0.45, green: 0.30, blue: 0.60))
 
-                TextField("Enter your name here...", text: $name)
-                    .font(.title2.bold())
+                TextField("Enter your name here...", text: $name, prompt: Text("Enter your name here...").foregroundStyle(.white.opacity(0.7)))
+                    .font(.title3.bold())
                     .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
                     .background(Color(red: 0.62, green: 0.49, blue: 0.70))
                     .clipShape(Capsule())
 
