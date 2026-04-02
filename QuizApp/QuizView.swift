@@ -13,6 +13,8 @@ struct QuizView: View {
 
     @State private var selectedAnswer: String? = nil
     @State private var answered = false
+    @State private var slideOffset: CGFloat = 0
+    @State private var cardOpacity: Double = 1
 
     private let letters = ["A", "B", "C", "D"]
     private let cardColor = Color(red: 0.62, green: 0.49, blue: 0.70)
@@ -27,64 +29,84 @@ struct QuizView: View {
             VStack(spacing: 8) {
                  ProgressView(value: Double(questionIndex + 1), total: Double(sampleQuestions.count))
                      .tint(darkPurple)
+                     .animation(.easeInOut(duration: 0.4), value: questionIndex)
 
-                 Text("Score: \(score)")
-                     .font(.subheadline.bold())
-                     .foregroundStyle(darkPurple)
+                 HStack {
+                     Text("\(questionIndex + 1)/\(sampleQuestions.count)")
+                         .font(.subheadline.bold())
+                         .foregroundStyle(darkPurple.opacity(0.7))
+
+                     Spacer()
+
+                     Text("Score: \(score)")
+                         .font(.subheadline.bold())
+                         .foregroundStyle(darkPurple)
+                 }
              }
              .padding(.horizontal, 40)
-            // Question card
-            VStack(spacing: 12) {
-                Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.white.opacity(0.8))
 
-                Text(question.text)
-                    .font(.title3.bold())
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
-            }
-            .padding(.vertical, 28)
-            .padding(.horizontal, 20)
-            .frame(maxWidth: .infinity)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 24))
-            .padding(.horizontal, 20)
+            // Question card + answers
+            VStack(spacing: 24) {
+                // Question card
+                VStack(spacing: 12) {
+                    Text("Fråga \(questionIndex + 1) av \(sampleQuestions.count)")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.white.opacity(0.8))
 
-            // Answer options
-            VStack(spacing: 12) {
-                ForEach(Array(question.answers.enumerated()), id: \.offset) { index, option in
-                    Button {
-                        selectedAnswer = option
-                    } label: {
-                        HStack(spacing: 14) {
-                            Text(letters[index])
-                                .font(.callout.bold())
-                                .foregroundStyle(darkPurple)
-                                .frame(width: 32, height: 32)
-                                .background(Color.white)
-                                .clipShape(Circle())
+                    Text(question.text)
+                        .font(.title3.bold())
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+                .padding(.vertical, 28)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity)
+                .background(cardColor)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .padding(.horizontal, 20)
 
-                            Text(option)
-                                .font(.body)
-                                .foregroundStyle(darkPurple)
+                // Answer options
+                VStack(spacing: 12) {
+                    ForEach(Array(question.answers.enumerated()), id: \.offset) { index, option in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedAnswer = option
+                            }
+                        } label: {
+                            HStack(spacing: 14) {
+                                Text(letters[index])
+                                    .font(.callout.bold())
+                                    .foregroundStyle(darkPurple)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white)
+                                    .clipShape(Circle())
 
-                            Spacer()
+                                Text(option)
+                                    .font(.body)
+                                    .foregroundStyle(darkPurple)
+
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(buttonColor(for: option, question: question))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(selectedAnswer == option ? Color.white : Color.clear, lineWidth: 2)
+                            )
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(buttonColor(for: option, question: question))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(selectedAnswer == option ? Color.white : Color.clear, lineWidth: 2)
-                        )
+                        .disabled(answered)
+                        .scaleEffect(selectedAnswer == option ? 1.03 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedAnswer)
                     }
                 }
+                .padding(.horizontal, 30)
             }
-            .padding(.horizontal, 30)
+            .offset(x: slideOffset)
+            .opacity(cardOpacity)
 
             Spacer()
 
@@ -97,10 +119,10 @@ struct QuizView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(selectedAnswer == nil ? cardColor.opacity(0.4) : cardColor)
+                    .background(selectedAnswer == nil || answered ? cardColor.opacity(0.4) : cardColor)
                     .clipShape(Capsule())
             }
-            .disabled(selectedAnswer == nil)
+            .disabled(selectedAnswer == nil || answered)
             .padding(.horizontal, 40)
             .padding(.bottom, 20)
         }
@@ -108,32 +130,66 @@ struct QuizView: View {
     }
 
     func checkAnswer(question: Question) {
+        guard !answered else { return }
         answered = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {  // creates a delay before changing screen so you can see the colour change
-            if selectedAnswer == question.correctAnswer {
+        let isCorrect = selectedAnswer == question.correctAnswer
+        let isLastQuestion = questionIndex >= sampleQuestions.count - 1
+
+        Task { @MainActor in
+            // Show green/red for 0.8s
+            try? await Task.sleep(for: .milliseconds(800))
+
+            if isCorrect {
                 score += 1
             }
 
+            // Slide out to the left
+            withAnimation(.easeIn(duration: 0.25)) {
+                slideOffset = -400
+                cardOpacity = 0
+            }
+
+            try? await Task.sleep(for: .milliseconds(300))
+
+            // Reset state for next question
             selectedAnswer = nil
             answered = false
 
-            if questionIndex < sampleQuestions.count - 1 {
-                questionIndex += 1
+            // Advance to next question or result
+            if isLastQuestion {
+                slideOffset = 0
+                cardOpacity = 1
+                withAnimation(.easeInOut(duration: 0.35)) {
+                    screen = .result
+                }
             } else {
-                screen = .result
+                questionIndex += 1
+
+                // Position off-screen right (no animation)
+                slideOffset = 400
+                cardOpacity = 0
+
+                // Small delay so SwiftUI registers the new position
+                try? await Task.sleep(for: .milliseconds(50))
+
+                // Slide in from the right
+                withAnimation(.easeOut(duration: 0.3)) {
+                    slideOffset = 0
+                    cardOpacity = 1
+                }
             }
         }
     }
     
     func buttonColor(for option: String, question: Question) -> Color {
         guard selectedAnswer == option else {
-            return pillColor.opacity(0.5)  // Colour stays the same if not selected
+            return pillColor.opacity(0.5)
         }
         if !answered {
-            return cardColor.opacity(0.7)  // Colour change after being selected
+            return cardColor.opacity(0.7)
         }
-        return option == question.correctAnswer ? Color.green.opacity(0.7) : Color.red.opacity(0.7) // This changes the colour into red or green depending on whether the answer is correct or not
+        return option == question.correctAnswer ? Color.green.opacity(0.7) : Color.red.opacity(0.7)
     }
 }
 
