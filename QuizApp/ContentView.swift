@@ -11,7 +11,10 @@ struct ContentView: View {
     @State private var screen: Screen = .start
     @State private var score = 0
     @State private var questionIndex = 0
-
+    // Saves the user's last quiz score.
+    // Using @AppStorage makes it reactive in SwiftUI,
+    // so any view using this variable updates automatically when it changes
+    @AppStorage("lastScore") private var lastScore = 0
     var body: some View {
         ZStack {
             LinearGradient(
@@ -37,6 +40,7 @@ struct ContentView: View {
 
             case .result:
                 ResultView(score: score, total: sampleQuestions.count, screen: $screen) {
+                    lastScore = score
                     score = 0
                     questionIndex = 0
                 }
