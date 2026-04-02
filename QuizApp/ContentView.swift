@@ -11,6 +11,11 @@ struct ContentView: View {
     @State private var screen: Screen = .start
     @State private var score = 0
     @State private var questionIndex = 0
+    
+    // Stores the user's last score persistently using UserDefaults.
+    // The @AppStorage property wrapper automatically reads/writes the value
+    // associated with the key "lastScore" so it persists across app launches.
+    @AppStorage("lastScore") private var lastScore = 0 
 
     var body: some View {
         ZStack {
@@ -37,10 +42,11 @@ struct ContentView: View {
 
             case .result:
                 ResultView(score: score, total: sampleQuestions.count, screen: $screen)
+                }
             }
         }
     }
-}
+
 
 #Preview {
     ContentView()

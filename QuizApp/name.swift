@@ -15,10 +15,11 @@ struct NameFieldSnippet: View {
         VStack(spacing: 16) {
 
             if confirmedName.isEmpty {
-                Text("Vad heter du?")
+                Text("What should we call you?")
                     .font(.headline)
+                    .foregroundStyle(Color(red: 0.45, green: 0.30, blue: 0.60))
 
-                TextField("Skriv ditt namn här", text: $name)
+                TextField("Write your name here...", text: $name)
                     .font(.title2.bold())
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -32,7 +33,7 @@ struct NameFieldSnippet: View {
                 .disabled(name.isEmpty)
 
             } else {
-                Text("Hej, \(confirmedName)!")
+                Text("Hej, \(confirmedName)! GOOD LUCK 😄")
                     .font(.title)
                     .fontWeight(.bold)
             }

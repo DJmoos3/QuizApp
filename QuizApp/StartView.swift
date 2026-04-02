@@ -9,11 +9,20 @@ import SwiftUI
 
 struct StartView: View {
     @Binding var screen: Screen
+    
+    @AppStorage("lastScore") private var lastScore = 0
 
     var body: some View {
         VStack {
             Spacer()
             NameFieldSnippet()
+            Text("Last Score: \(lastScore)")
+                .font(.footnote.bold())
+                .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color(red: 0.62, green: 0.49, blue: 0.70))
+                    .clipShape(Capsule())
 
             VStack(spacing: 16) {
                 Image(systemName: "brain.head.profile")
