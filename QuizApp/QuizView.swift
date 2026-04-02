@@ -29,9 +29,17 @@ struct QuizView: View {
                      .tint(darkPurple)
                      .animation(.easeInOut(duration: 0.4), value: questionIndex)
 
-                 Text("Score: \(score)")
-                     .font(.subheadline.bold())
-                     .foregroundStyle(darkPurple)
+                 HStack {
+                     Text("\(questionIndex + 1)/\(sampleQuestions.count)")
+                         .font(.subheadline.bold())
+                         .foregroundStyle(darkPurple.opacity(0.7))
+
+                     Spacer()
+
+                     Text("Score: \(score)")
+                         .font(.subheadline.bold())
+                         .foregroundStyle(darkPurple)
+                 }
              }
              .padding(.horizontal, 40)
 
